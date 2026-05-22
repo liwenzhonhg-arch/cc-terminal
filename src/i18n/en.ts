@@ -1,0 +1,259 @@
+import type { TranslationKey } from "./zh";
+
+export const en: Record<TranslationKey, string> = {
+  // ThemeToggle
+  "theme.toggle": "Toggle theme",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+
+  // TokenGauge
+  "token.input": "Input",
+  "token.output": "Output",
+  "token.cache": "cache",
+  "token.usage": "Token Usage",
+
+  // ConfirmDialog
+  "dialog.cancel": "Cancel",
+  "dialog.confirm": "Confirm",
+
+  // ProjectList
+  "sidebar.chats": "Chats",
+  "sidebar.addFolder": "+ folder",
+  "sidebar.addFolderTooltip": "Open folder as new project",
+  "sidebar.workingFolder": "Working folder: {path}\nClick to change",
+  "sidebar.noProject": "No project",
+  "sidebar.switchProject": "Switch project",
+  "sidebar.newChat": "New chat",
+  "sidebar.projects": "Projects",
+  "sidebar.chatsCount": " · {count} chats",
+  "sidebar.removeProject": "Remove project",
+  "sidebar.openFolder": "+ Open folder...",
+  "sidebar.loadingSessions": "Loading sessions...",
+  "sidebar.noProjectsYet": "No projects yet",
+  "sidebar.noChatsYet": "No chats yet",
+  "sidebar.teams": "Teams",
+  "sidebar.close": "Close",
+  "sidebar.newChatDefault": "New Chat",
+  "sidebar.cost": "Cost",
+  "sidebar.newTeam": "New Team",
+  "sidebar.settings": "Settings",
+
+  // CostPanel
+  "cost.quota": "Quota",
+  "cost.currentSession": "Current session",
+  "cost.currentWeek": "Current week (all models)",
+  "cost.thisSession": "This Session",
+  "cost.input": "Input",
+  "cost.output": "Output",
+  "cost.cacheRead": "Cache Read",
+  "cost.cacheWrite": "Cache Write",
+  "cost.cost": "Cost",
+  "cost.last30Days": "Last 30 Days",
+  "cost.totalCost": "Total Cost",
+  "cost.dailyTokens": "Daily Tokens",
+  "cost.dailyCost": "Daily Cost (USD)",
+  "cost.loading": "Loading...",
+  "cost.tokens": "Tokens",
+  "cost.in": "in",
+  "cost.out": "out",
+  "cost.resetsAt": "Resets ~{time}",
+  "cost.resetsAtDate": "Resets ~{date} {time}:00",
+
+  // Composer
+  "composer.working": "Agent is working...",
+  "composer.placeholder": "Message or /command",
+
+  // StatusIndicator
+  "status.reasoning": "reasoning",
+  "status.executing": "executing",
+
+  // Skills
+  "skills.title": "Skills",
+  "skills.refresh": "Refresh",
+  "skills.searchPlaceholder": "Search skills...",
+  "skills.all": "All",
+  "skills.installed": "Installed",
+  "skills.scanning": "Scanning ~/.claude/skills/...",
+  "skills.noMatch": "No skills match search",
+  "skills.noSkills": "No skills found",
+  "skills.installedBadge": "Installed",
+  "skills.renameGroup": "Rename group",
+  "skills.moveToGroup": "Move to group",
+  "skills.newGroup": "New group...",
+
+  // MCP
+  "mcp.title": "MCP Servers",
+  "mcp.refresh": "Refresh",
+  "mcp.reading": "Reading ~/.claude/settings.json...",
+  "mcp.noServers": "No MCP servers configured",
+  "mcp.on": "ON",
+  "mcp.transport": "Transport",
+  "mcp.command": "Command",
+  "mcp.args": "Args",
+  "mcp.url": "URL",
+  "mcp.env": "Env",
+  "mcp.writesRequireConfirm": "Writes require confirmation",
+  "mcp.source": "Source",
+  "mcp.global": "Global",
+  "mcp.project": "Project",
+  "mcp.projectLocal": "Project local",
+
+  // Plugins
+  "plugins.title": "Plugins",
+  "plugins.refresh": "Refresh",
+  "plugins.reading": "Reading installed plugins...",
+  "plugins.noPlugins": "No plugins installed",
+  "plugins.viewOnGithub": "View on GitHub →",
+  "plugins.version": "version",
+  "plugins.author": "Author",
+  "plugins.license": "License",
+  "plugins.installedAt": "Installed",
+
+  // CreateTeamDialog
+  "createTeam.title": "Create Team",
+  "createTeam.nameLabel": "Team Name",
+  "createTeam.namePlaceholder": "Refactoring Squad",
+  "createTeam.tlLabel": "Team Lead Description",
+  "createTeam.tlHint": "Injected as TL system prompt. Members can be added after creation.",
+  "createTeam.workingDir": "Working directory: {path}",
+  "createTeam.cancel": "Cancel",
+  "createTeam.creating": "Creating...",
+  "createTeam.create": "Create & Open",
+
+  // AddMemberDialog
+  "addMember.title": "Add Team Member",
+  "addMember.nameLabel": "Name (@mention identifier)",
+  "addMember.namePlaceholder": "frontend",
+  "addMember.nameError": "Only lowercase letters, numbers, hyphens",
+  "addMember.descLabel": "Description (injected as system prompt)",
+  "addMember.descPlaceholder": "Frontend specialist. Handles React components, CSS, and UI implementation.",
+  "addMember.cancel": "Cancel",
+  "addMember.spawning": "Spawning...",
+  "addMember.add": "Add",
+
+  // TeamSidebar
+  "teamSidebar.noAgents": "No agents yet",
+  "teamSidebar.addMember": "Add Member",
+  "teamSidebar.disband": "Disband",
+  "teamSidebar.disbandTitle": "Disband Team",
+  "teamSidebar.disbandDesc": "Kill all {count} agents and close this team?",
+  "teamSidebar.disbandConfirm": "Disband",
+  "teamSidebar.agentCount": "{count} agents",
+  "teamSidebar.remove": "Remove",
+  "teamSidebar.statusIdle": "idle",
+  "teamSidebar.statusThinking": "thinking...",
+  "teamSidebar.statusToolUse": "tool use",
+  "teamSidebar.statusDone": "done",
+  "teamSidebar.statusError": "error",
+  "teamSidebar.statusSpawning": "spawning...",
+
+  // GroupChatView
+  "groupChat.you": "You",
+  "groupChat.toolResult": "Tool result",
+  "groupChat.teamChat": "Team Chat",
+  "groupChat.startMessage": "Send a message to start collaborating",
+
+  // TeamComposer
+  "teamComposer.working": "Agents are working...",
+  "teamComposer.placeholder": "@agent message, /command, or just type to talk to TL",
+
+  // TeamChatContent
+  "teamChat.loading": "Loading team...",
+  "teamChat.agentExited": "Agent {name} exited (code {code})",
+
+  // ThreadView
+  "thread.selectThread": "Select a thread to begin",
+  "thread.newThread": "Ctrl+N · new thread",
+  "thread.switchThread": "Alt+↑↓ · switch",
+  "thread.hello": "Start a new conversation",
+  "thread.typeBelow": "Type a message below to begin",
+  "thread.scrollToBottom": "Scroll to bottom",
+  "thread.spawnFailed": "Spawn failed: {error}",
+  "thread.sendFailed": "Send failed: {error}",
+  "thread.agentExited": "Agent exited with code {code}",
+
+  // UserMessage
+  "message.you": "You",
+
+  // ToolCard
+  "tool.fold": "fold",
+  "tool.peek": "peek",
+
+  // SlashCommandPopup
+  "cmd.soon": "soon",
+
+  // RightPanelContainer
+  "panel.cost": "Cost",
+  "panel.skills": "Skills",
+  "panel.mcp": "MCP",
+  "panel.plugins": "Plugins",
+  "panel.settings": "Settings",
+
+  // Commands
+  "cmd.clear.desc": "Clear thread messages and reset agent",
+  "cmd.cost.desc": "Open cost panel",
+  "cmd.help.desc": "Show available commands",
+  "cmd.skills.desc": "Open skills panel",
+  "cmd.mcp.desc": "Open MCP panel",
+  "cmd.plugins.desc": "Open plugins panel",
+  "cmd.compact.desc": "Compact conversation context",
+  "cmd.review.desc": "Run code review (SDK skill)",
+  "cmd.init.desc": "Initialize project (SDK skill)",
+  "cmd.config.desc": "Open settings panel",
+  "cmd.model.desc": "Switch model (coming soon)",
+  "cmd.permissions.desc": "Permission management (coming soon)",
+  "cmd.memory.desc": "Memory file browser (coming soon)",
+  "cmd.login.desc": "Login flow (coming soon)",
+  "cmd.doctor.desc": "Diagnostics (coming soon)",
+  "cmd.cleared": "Cleared.",
+  "cmd.costOpened": "Cost panel opened.",
+  "cmd.skillsOpened": "Skills panel opened.",
+  "cmd.mcpOpened": "MCP panel opened.",
+  "cmd.pluginsOpened": "Plugins panel opened.",
+  "cmd.configOpened": "Settings panel opened.",
+  "cmd.notAvailable": "/{name} is not yet available. Coming soon.",
+  "cmd.notInTeam": "/{name} is not available in team mode.",
+  "cmd.needsAgent": "/{name} requires a running agent. Send a message first to start one.",
+  "cmd.unknown": "Unknown command. Type /help for available commands.",
+  "cmd.available": "Available commands",
+  "cmd.comingSoon": "Coming soon",
+
+  // Hooks
+  "hooks.title": "Hooks",
+  "hooks.refresh": "Refresh",
+  "hooks.loading": "Reading hooks config...",
+  "hooks.noHooks": "No hooks configured",
+  "hooks.type": "Type",
+  "hooks.command": "Command",
+  "hooks.prompt": "Prompt",
+  "hooks.url": "URL",
+  "hooks.tool": "Tool",
+  "hooks.matcher": "Matcher",
+  "hooks.timeout": "Timeout",
+  "hooks.source": "Source",
+  "hooks.global": "Global",
+  "hooks.project": "Project",
+  "hooks.projectLocal": "Project local",
+  "hooks.readOnly": "Read-only",
+  "hooks.condition": "Condition",
+  "panel.hooks": "Hooks",
+  "sidebar.hooks": "Hooks",
+  "cmd.hooks.desc": "Open Hooks panel",
+  "cmd.hooksOpened": "Hooks panel opened.",
+
+  // Settings
+  "settings.title": "Settings",
+  "settings.language": "Language",
+  "settings.languageDesc": "Switch interface language",
+  "settings.chinese": "中文",
+  "settings.english": "English",
+
+  // ThreadTabBar
+  "threadTab.closeTab": "Close tab",
+
+  // fmt
+  "fmt.justNow": "just now",
+  "fmt.minsAgo": "{n}m ago",
+  "fmt.hoursAgo": "{n}h ago",
+  "fmt.daysAgo": "{n}d ago",
+};

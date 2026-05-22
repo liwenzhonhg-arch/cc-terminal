@@ -1,0 +1,70 @@
+/* cc-terminal global stylesheet */
+
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-serif/400.css";
+@import "@fontsource/ibm-plex-serif/500.css";
+
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-size: 16px;
+  }
+
+  html,
+  body,
+  #root {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: theme("fontFamily.sans");
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: rgb(var(--cc-ink));
+    background-color: rgb(var(--cc-surface));
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgb(var(--cc-ink) / 0.85);
+    color: rgb(var(--cc-surface));
+  }
+
+  /* Scrollbars — thin, mono-aesthetic */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--cc-border));
+    border-radius: 0;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--cc-muted) / 0.7);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
