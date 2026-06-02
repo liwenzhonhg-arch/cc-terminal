@@ -3,6 +3,7 @@ import { UserMessage } from "./UserMessage";
 import { AssistantMessage } from "./AssistantMessage";
 import { SystemMessage } from "./SystemMessage";
 import { CommandMessage } from "./CommandMessage";
+import { GitNotifyMessage } from "./GitNotifyMessage";
 import { ToolCard } from "./ToolCard";
 import { ToolResult } from "./ToolResult";
 
@@ -20,6 +21,8 @@ export function MessageBlock({ message }: { message: Message }) {
       return <SystemMessage content={message.content} />;
     case "command":
       return <CommandMessage content={message.content} />;
+    case "git_notify":
+      return <GitNotifyMessage message={message} />;
     default:
       return null;
   }

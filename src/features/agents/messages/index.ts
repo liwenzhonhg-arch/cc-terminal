@@ -4,5 +4,6 @@ export { UserMessage } from "./UserMessage";
 export { AssistantMessage } from "./AssistantMessage";
 export { SystemMessage } from "./SystemMessage";
 export { CommandMessage } from "./CommandMessage";
+export { GitNotifyMessage } from "./GitNotifyMessage";
 export { ToolCard } from "./ToolCard";
 export { ToolResult } from "./ToolResult";

@@ -33,6 +33,11 @@ pub struct UsageSummary {
     pub week_output: u64,
     pub week_cache_read: u64,
     pub week_cache_write: u64,
+    pub week_sonnet_cost_usd: f64,
+    pub week_sonnet_input: u64,
+    pub week_sonnet_output: u64,
+    pub week_sonnet_cache_read: u64,
+    pub week_sonnet_cache_write: u64,
     pub daily: Vec<DailyUsage>,
 }
 
@@ -61,6 +66,11 @@ pub async fn get_usage_stats(days: Option<u32>) -> Result<UsageSummary, String> 
                 week_output: 0,
                 week_cache_read: 0,
                 week_cache_write: 0,
+                week_sonnet_cost_usd: 0.0,
+                week_sonnet_input: 0,
+                week_sonnet_output: 0,
+                week_sonnet_cache_read: 0,
+                week_sonnet_cache_write: 0,
                 daily: Vec::new(),
             });
         }
@@ -83,6 +93,11 @@ pub async fn get_usage_stats(days: Option<u32>) -> Result<UsageSummary, String> 
         let mut week_out: u64 = 0;
         let mut week_cr: u64 = 0;
         let mut week_cw: u64 = 0;
+        let mut week_sonnet_cost: f64 = 0.0;
+        let mut week_sonnet_in: u64 = 0;
+        let mut week_sonnet_out: u64 = 0;
+        let mut week_sonnet_cr: u64 = 0;
+        let mut week_sonnet_cw: u64 = 0;
 
         let mut daily_map: BTreeMap<String, DailyUsage> = BTreeMap::new();
 
@@ -169,6 +184,14 @@ pub async fn get_usage_stats(days: Option<u32>) -> Result<UsageSummary, String> 
                         week_out += output;
                         week_cr += cache_read;
                         week_cw += cache_write;
+
+                        if model.contains("sonnet") {
+                            week_sonnet_cost += cost;
+                            week_sonnet_in += input;
+                            week_sonnet_out += output;
+                            week_sonnet_cr += cache_read;
+                            week_sonnet_cw += cache_write;
+                        }
                     }
                 }
             }
@@ -198,6 +221,11 @@ pub async fn get_usage_stats(days: Option<u32>) -> Result<UsageSummary, String> 
             week_output: week_out,
             week_cache_read: week_cr,
             week_cache_write: week_cw,
+            week_sonnet_cost_usd: week_sonnet_cost,
+            week_sonnet_input: week_sonnet_in,
+            week_sonnet_output: week_sonnet_out,
+            week_sonnet_cache_read: week_sonnet_cr,
+            week_sonnet_cache_write: week_sonnet_cw,
             daily,
         })
     })

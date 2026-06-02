@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import { useAgentStore } from "@/store/agents";
+import { useConsoleStore } from "@/store/console";
 import { useT } from "@/i18n";
 import { useSlashCommands } from "@/lib/useSlashCommands";
 import { executeOrForward, type CommandContext } from "@/lib/commands";
@@ -23,6 +24,9 @@ export function Composer({ isWorking, cwd, model, threadId, agentId, onSend, onI
   const appendMessage = useAgentStore((s) => s.appendMessage);
   const activatePanel = useAgentStore((s) => s.activatePanel);
   const clearThread = useAgentStore((s) => s.clearThread);
+
+  const pendingSkills = useConsoleStore((s) => s.pendingSkills);
+  const removePendingSkill = useConsoleStore((s) => s.removePendingSkill);
 
   const slash = useSlashCommands();
 
@@ -96,6 +100,29 @@ export function Composer({ isWorking, cwd, model, threadId, agentId, onSend, onI
     <div className="shrink-0 border-t border-border bg-surface-chat">
       <div className="max-w-[72ch] mx-auto px-4 sm:px-6 py-4">
         <div className="relative">
+          {pendingSkills.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1 mb-1.5 px-1">
+              <span className="font-mono text-2xs text-faint select-none mr-0.5">
+                {t("composer.skills")}:
+              </span>
+              {pendingSkills.map((name) => (
+                <span
+                  key={name}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-2xs text-amber border border-amber/30 bg-amber/5"
+                >
+                  /{name}
+                  <button
+                    onClick={() => removePendingSkill(name)}
+                    className="text-faint hover:text-ink transition-colors leading-none"
+                    type="button"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
           <span className="absolute left-3 top-3 font-mono text-xs text-muted select-none pointer-events-none">
             {isWorking ? "···" : ">"}
           </span>

@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { PanelId } from "@/store/agents";
+import { useGitStore } from "@/store/git";
 import { t } from "@/i18n";
 import type { TranslationKey } from "@/i18n";
 
@@ -34,6 +35,8 @@ export const COMMANDS: SlashCommand[] = [
   { name: "mcp",         descKey: "cmd.mcp.desc",         category: "local",    icon: "⊞" },
   { name: "plugins",     descKey: "cmd.plugins.desc",     category: "local",    icon: "▣" },
   { name: "hooks",       descKey: "cmd.hooks.desc",       category: "local",    icon: "↪" },
+  { name: "commit",     descKey: "cmd.commit.desc",      category: "local",    icon: "⊕" },
+  { name: "pr",         descKey: "cmd.pr.desc",          category: "local",    icon: "⊗" },
   { name: "config",      descKey: "cmd.config.desc",      category: "local",    icon: "⚙" },
   { name: "compact",     descKey: "cmd.compact.desc",     category: "forward",  icon: "⊟" },
   { name: "review",      descKey: "cmd.review.desc",      category: "forward",  icon: "◆" },
@@ -138,6 +141,15 @@ async function executeCommand(
     case "hooks":
       ctx.activatePanel("hooks");
       return { handled: true, feedbackMessage: t("cmd.hooksOpened") };
+
+    case "commit":
+      ctx.activatePanel("git");
+      return { handled: true, feedbackMessage: t("cmd.commitOpened") };
+
+    case "pr":
+      ctx.activatePanel("git");
+      useGitStore.getState().setPrFormOpen(true);
+      return { handled: true, feedbackMessage: t("cmd.prOpened") };
 
     default:
       return { handled: false };

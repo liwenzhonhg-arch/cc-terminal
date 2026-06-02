@@ -4,6 +4,7 @@ import { SkillsPanelContent } from "@/features/console/SkillsPanelContent";
 import { McpPanelContent } from "@/features/console/McpPanelContent";
 import { PluginsPanelContent } from "@/features/console/PluginsPanelContent";
 import { HooksPanelContent } from "@/features/console/HooksPanelContent";
+import { GitPanelContent } from "@/features/agents/GitPanelContent";
 import { SettingsPanelContent } from "@/components/SettingsPanel";
 
 export function RightPanelContainer({ width }: { width: number }) {
@@ -18,6 +19,7 @@ export function RightPanelContainer({ width }: { width: number }) {
       {activeTab === "mcp" && <McpPanelContent />}
       {activeTab === "plugins" && <PluginsPanelContent />}
       {activeTab === "hooks" && <HooksPanelContent />}
+      {activeTab === "git" && <GitPanelContent />}
       {activeTab === "settings" && <SettingsPanelContent />}
     </aside>
   );

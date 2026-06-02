@@ -33,6 +33,13 @@ pub fn run() {
             commands::team::remove_team_agent,
             commands::team::disband_team,
             commands::team::get_team,
+            commands::git::git_status,
+            commands::git::git_diff,
+            commands::git::git_stage,
+            commands::git::git_commit,
+            commands::git::git_push,
+            commands::git::gh_pr_create,
+            commands::git::gh_auth_status,
         ])
         .setup(|_app| {
             Ok(())

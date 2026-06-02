@@ -146,6 +146,7 @@ pub async fn create_team(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn add_team_agent(
     app: AppHandle,
     team_state: State<'_, TeamState>,
@@ -154,6 +155,7 @@ pub async fn add_team_agent(
     agent_name: String,
     role: String,
     description: String,
+    skills: Option<Vec<String>>,
 ) -> Result<String, String> {
     let (system_prompt, cwd) = {
         let teams = team_state
@@ -206,13 +208,16 @@ pub async fn add_team_agent(
             .ok_or_else(|| "无法获取 team sidecar stderr".to_string())?;
 
         // Send hello
-        let hello = serde_json::json!({
+        let mut hello = serde_json::json!({
             "type": "hello",
             "cwd": cwd,
             "systemPrompt": system_prompt,
             "model": "claude-opus-4-6",
             "permissionMode": "acceptEdits",
         });
+        if let Some(ref s) = skills {
+            hello["skills"] = serde_json::json!(s);
+        }
         let hello_line = format!("{}\n", hello);
         stdin
             .write_all(hello_line.as_bytes())

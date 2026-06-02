@@ -12,9 +12,9 @@ export type ThreadStatus =
   | "error"
   | "crashed";
 
-export type PanelId = "cost" | "skills" | "mcp" | "plugins" | "hooks" | "settings";
+export type PanelId = "cost" | "skills" | "mcp" | "plugins" | "hooks" | "settings" | "git";
 
-export type MessageRole = "user" | "assistant" | "system" | "tool_use" | "tool_result" | "result" | "command";
+export type MessageRole = "user" | "assistant" | "system" | "tool_use" | "tool_result" | "result" | "command" | "git_notify";
 
 export type Message = {
   id: string;
@@ -30,6 +30,8 @@ export type ThreadUsage = {
   cacheRead: number;
   cacheWrite: number;
   costUsd: number;
+  durationMs: number;
+  durationApiMs: number;
 };
 
 export type Thread = {
@@ -44,6 +46,7 @@ export type Thread = {
   sessionId: string | null;
   title: string | null;
   lastModified: number;
+  createdAt: number;
 };
 
 export type Project = {
@@ -122,6 +125,7 @@ type PersistedThread = {
   sessionId: string | null;
   title: string | null;
   lastModified: number;
+  createdAt: number;
 };
 
 type PersistedState = {
@@ -144,6 +148,7 @@ function saveToStorage(state: Pick<AgentStore, "projects" | "threads" | "activeT
       sessionId: t.sessionId,
       title: t.title,
       lastModified: t.lastModified,
+      createdAt: t.createdAt,
     };
   }
   const persisted: PersistedState = {
@@ -175,7 +180,8 @@ function loadFromStorage(): { projects: Record<string, Project>; threads: Record
         agentId: null,
         status: "idle",
         messages: [],
-        usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0 },
+        usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0, durationMs: 0, durationApiMs: 0 },
+        createdAt: pt.lastModified,
       };
     }
     const openThreadTabs = (data.openThreadTabs ?? []).filter((id) => id in threads);
@@ -279,11 +285,12 @@ export const useAgentStore = create<AgentStore>((set) => ({
             cwd,
             status: "idle" as ThreadStatus,
             messages: [],
-            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0 },
+            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0, durationMs: 0, durationApiMs: 0 },
             model,
             sessionId: null,
             title: null,
             lastModified: Date.now(),
+            createdAt: Date.now(),
           },
         },
         projects: {
@@ -376,7 +383,9 @@ export const useAgentStore = create<AgentStore>((set) => ({
         prev.output === next.output &&
         prev.cacheRead === next.cacheRead &&
         prev.cacheWrite === next.cacheWrite &&
-        prev.costUsd === next.costUsd
+        prev.costUsd === next.costUsd &&
+        prev.durationMs === next.durationMs &&
+        prev.durationApiMs === next.durationApiMs
       )
         return s;
       return {
@@ -399,7 +408,7 @@ export const useAgentStore = create<AgentStore>((set) => ({
             messages: [],
             agentId: null,
             status: "idle",
-            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0 },
+            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0, durationMs: 0, durationApiMs: 0 },
           },
         },
       };
@@ -617,11 +626,12 @@ export const useAgentStore = create<AgentStore>((set) => ({
             cwd: session.cwd,
             status: "idle",
             messages: [],
-            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0 },
+            usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, costUsd: 0, durationMs: 0, durationApiMs: 0 },
             model: "claude-opus-4-6",
             sessionId: session.sessionId,
             title: session.title ?? null,
             lastModified: session.lastModified,
+            createdAt: session.lastModified,
           };
 
           newProjects[projectId].threadIds.push(threadId);

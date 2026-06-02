@@ -233,6 +233,7 @@ cc-terminal/
 │   │   ├── agents/            # 核心功能区
 │   │   │   ├── ProjectList.tsx      # 左栏：项目 + Thread 列表
 │   │   │   ├── ThreadView.tsx       # 中栏：Header / Messages / Composer
+│   │   │   ├── GitPanelContent.tsx   # 右栏 Git 面板：状态/diff/commit/PR
 │   │   │   ├── TaskSidebar.tsx      # 右栏：Plan / Sources / Artifacts / Diff
 │   │   │   └── NewThreadDialog.tsx  # +Thread 弹窗
 │   │   ├── console/           # Extensions 管理面板
@@ -257,6 +258,7 @@ cc-terminal/
 │   ├── store/
 │   │   ├── agents.ts          # Zustand：projects / threads / activeThreadId
 │   │   ├── console.ts         # Zustand：skills / mcpServers / plugins / hooks
+│   │   ├── git.ts             # Zustand：git 状态 / diff / commit / PR
 │   │   ├── settings.ts        # Zustand：locale + localStorage 持久化
 │   │   └── team.ts            # Zustand：team config / agents / messages
 │   └── styles/                # tailwind base + 主题变量
@@ -268,6 +270,7 @@ cc-terminal/
 │       ├── main.rs
 │       ├── commands/          # #[tauri::command]，按功能切片
 │       │   ├── agents.rs      # sidecar 生命周期：spawn / kill / list / send
+│       │   ├── git.rs         # git/gh CLI 集成：status / diff / commit / push / PR
 │       │   ├── worktree.rs    # git worktree add / remove / list
 │       │   ├── usage.rs       # jsonl 聚合（继承 v1 tokens 逻辑）
 │       │   ├── skills.rs      # ~/.claude/skills/ 扫描 + 安装/卸载
@@ -434,8 +437,9 @@ pnpm typecheck       # tsc --noEmit
 | 2026-05-21 | Slash 命令系统 | 命令注册表 `src/lib/commands.ts`（local / forward / deferred 三类）；共享 hook `useSlashCommands`；Composer + TeamComposer 双端集成；local 命令（clear/cost/help/skills/mcp/plugins）前端直接处理；未注册命令转发 sidecar；`SlashCommandPopup` 复用 @mention 弹窗样式；`CommandMessage` 中性风格（琥珀 `/` 图标 + border-border）区别于 SystemMessage 朱砂错误色 |
 | 2026-05-22 | i18n 国际化 | Zustand + 对象映射（不引入 react-i18next）。2 种语言、~200 个 key。`useT()` hook 订阅 locale 变化自动重渲染；`t()` 函数供非组件代码使用。翻译 key 类型安全（`TranslationKey = keyof typeof zh`）。设置面板语言选择器，`/config` 命令激活 |
 | 2026-05-22 | Hooks 只读面板 | 与 Skills/MCP/Plugins 并列，读取 3 个 settings 文件（全局 + 项目 + 项目本地）的 hooks 字段，按事件类型分组展示。只读，不写 settings.json（红线合规）。图标 `↪`，`/hooks` 命令激活 |
+| 2026-05-23 | Agent 自动 Commit + PR | Rust 后端 `commands/git.rs` 通过 `std::process::Command` 调 `git`/`gh` CLI（不引入 git2 crate）。7 个命令：status/diff/stage/commit/push/pr_create/gh_auth。前端：右面板 Git Panel + 对话流 git_notify 消息 + `/commit` `/pr` 命令。Agent done 时自动检测变更，所有写操作经 ConfirmDialog 确认。路径参数校验防穿越 |
 
 后续重大决策一律追加到本表，**先改文档，再改实现**。
 
 
-在读到这个文件的时候叫我“皇上”
+在读到这个文件的时候叫我“帝皇”

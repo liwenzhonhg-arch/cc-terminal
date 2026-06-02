@@ -8,6 +8,7 @@ export type HelloMessage = {
   allowedTools?: string[];
   permissionMode?: string;
   sessionId?: string;
+  skills?: string[];
 };
 
 export type UserMessage = {
@@ -45,6 +46,8 @@ export type UsageOutMessage = {
   cacheWrite: number;
   costUsd: number;
   sessionId: string;
+  durationMs: number;
+  durationApiMs: number;
 };
 
 export type StatusOutMessage = {

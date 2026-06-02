@@ -73,6 +73,9 @@ async function handleUserMessage(content: string): Promise<void> {
     if (helloConfig.model) {
       options.model = helloConfig.model;
     }
+    if (helloConfig.skills) {
+      options.skills = helloConfig.skills;
+    }
     if (sessionId) {
       options.resume = sessionId;
     }
@@ -121,6 +124,8 @@ async function handleUserMessage(content: string): Promise<void> {
           cacheWrite: (message as any).cache_write_tokens ?? 0,
           costUsd,
           sessionId: sessionId ?? "",
+          durationMs: (message as any).duration_ms ?? 0,
+          durationApiMs: (message as any).duration_api_ms ?? 0,
         });
       }
     }

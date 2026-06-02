@@ -17,6 +17,12 @@ export function SkillsPanelContent() {
   const groupConfig = useConsoleStore((s) => s.skillGroupConfig);
   const setGroupDisplayName = useConsoleStore((s) => s.setGroupDisplayName);
   const setSkillGroup = useConsoleStore((s) => s.setSkillGroup);
+  const toggleConfig = useConsoleStore((s) => s.skillToggleConfig);
+  const setMasterEnabled = useConsoleStore((s) => s.setMasterEnabled);
+  const toggleSkill = useConsoleStore((s) => s.toggleSkill);
+  const pendingSkills = useConsoleStore((s) => s.pendingSkills);
+  const addPendingSkill = useConsoleStore((s) => s.addPendingSkill);
+  const removePendingSkill = useConsoleStore((s) => s.removePendingSkill);
 
   const getEffectiveNs = useCallback(
     (skill: SkillEntry) => {
@@ -25,6 +31,13 @@ export function SkillsPanelContent() {
     },
     [groupConfig.skillGroups],
   );
+
+  const isSkillEnabled = useCallback(
+    (name: string) => toggleConfig.masterEnabled && !toggleConfig.disabledSkills.includes(name),
+    [toggleConfig],
+  );
+
+  const enabledCount = skills.filter((s) => isSkillEnabled(s.name)).length;
 
   useEffect(() => {
     loadSkills();
@@ -114,15 +127,30 @@ export function SkillsPanelContent() {
         <div className="flex items-center gap-1.5">
           <span className="text-amber/70 font-mono text-xs select-none">{"◇"}</span>
           <span className="font-serif text-sm text-ink">{t("skills.title")}</span>
-          <span className="font-mono text-2xs text-faint">{skills.length}</span>
+          <span className="font-mono text-2xs text-faint">
+            {enabledCount}/{skills.length}
+          </span>
         </div>
-        <button
-          onClick={() => loadSkills()}
-          className="font-mono text-2xs text-muted hover:text-ink transition-colors px-1.5 py-0.5"
-          title={t("skills.refresh")}
-        >
-          {"↻"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setMasterEnabled(!toggleConfig.masterEnabled)}
+            className={`font-mono text-2xs px-1.5 py-0.5 border transition-colors ${
+              toggleConfig.masterEnabled
+                ? "text-moss border-moss/30 hover:bg-moss/10"
+                : "text-faint border-border/50 hover:text-ink"
+            }`}
+            title={t("skills.masterToggle")}
+          >
+            {toggleConfig.masterEnabled ? t("skills.on") : t("skills.off")}
+          </button>
+          <button
+            onClick={() => loadSkills()}
+            className="font-mono text-2xs text-muted hover:text-ink transition-colors px-1.5 py-0.5"
+            title={t("skills.refresh")}
+          >
+            {"↻"}
+          </button>
+        </div>
       </div>
 
       {/* Search */}
@@ -201,36 +229,77 @@ export function SkillsPanelContent() {
                       {"✎"}
                     </button>
                   )}
-                  <span className="font-mono text-2xs text-faint">{nsSkills.length}</span>
+                  <span className="font-mono text-2xs text-faint">
+                    {nsSkills.filter((s) => isSkillEnabled(s.name)).length}/{nsSkills.length}
+                  </span>
                 </div>
               </div>
               {expanded &&
-                nsSkills.map((skill) => (
-                  <button
-                    key={skill.path}
-                    onClick={() => selectSkill(selectedSkill === skill.name ? null : skill.name)}
-                    className={`w-full text-left px-3 py-2 border-b border-border/20 transition-colors ${
-                      selectedSkill === skill.name
-                        ? "bg-border/60 text-ink"
-                        : "text-muted hover:text-ink hover:bg-border/40"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-amber/50 text-2xs select-none">{"◇"}</span>
-                      <span className="font-mono text-xs truncate">{skill.name}</span>
-                    </div>
-                    {skill.description && (
-                      <div className="font-sans text-2xs text-muted mt-0.5 line-clamp-2 pl-4">
-                        {skill.description}
+                nsSkills.map((skill) => {
+                  const enabled = isSkillEnabled(skill.name);
+                  return (
+                    <button
+                      key={skill.path}
+                      onClick={() => selectSkill(selectedSkill === skill.name ? null : skill.name)}
+                      className={`w-full text-left px-3 py-2 border-b border-border/20 transition-colors ${
+                        selectedSkill === skill.name
+                          ? "bg-border/60 text-ink"
+                          : enabled
+                            ? "text-muted hover:text-ink hover:bg-border/40"
+                            : "text-faint/50 hover:text-faint hover:bg-border/20"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (toggleConfig.masterEnabled) toggleSkill(skill.name);
+                          }}
+                          className={`inline-flex items-center justify-center w-3.5 h-3.5 border text-2xs select-none shrink-0 ${
+                            toggleConfig.masterEnabled ? "cursor-pointer" : "opacity-30 cursor-not-allowed"
+                          } ${enabled ? "border-moss/50 text-moss" : "border-border/30 text-transparent"}`}
+                          title={enabled ? t("skills.disable") : t("skills.enable")}
+                        >
+                          {enabled && "✓"}
+                        </span>
+                        <span className="text-amber/50 text-2xs select-none">{"◇"}</span>
+                        <span className={`font-mono text-xs truncate ${!enabled ? "line-through opacity-50" : ""}`}>
+                          {skill.name}
+                        </span>
+                        {enabled && (
+                          <span
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (pendingSkills.includes(skill.name)) {
+                                removePendingSkill(skill.name);
+                              } else {
+                                addPendingSkill(skill.name);
+                              }
+                            }}
+                            className={`ml-auto inline-flex items-center justify-center w-3 h-3 border cursor-pointer shrink-0 transition-colors ${
+                              pendingSkills.includes(skill.name)
+                                ? "border-amber bg-amber/20 text-amber"
+                                : "border-border/50 text-transparent hover:border-amber/50"
+                            }`}
+                            title={pendingSkills.includes(skill.name) ? t("skills.unqueue") : t("skills.queue")}
+                          >
+                            {pendingSkills.includes(skill.name) && "●"}
+                          </span>
+                        )}
                       </div>
-                    )}
-                    <div className="flex items-center gap-1.5 mt-1 pl-4">
-                      <span className="font-mono text-2xs text-moss/70 border border-moss/30 px-1 rounded-sm">
-                        {t("skills.installedBadge")}
-                      </span>
-                    </div>
-                  </button>
-                ))}
+                      {skill.description && (
+                        <div className={`font-sans text-2xs mt-0.5 line-clamp-2 pl-[3.25rem] ${enabled ? "text-muted" : "text-faint/40"}`}>
+                          {skill.description}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 mt-1 pl-[3.25rem]">
+                        <span className={`font-mono text-2xs border px-1 rounded-sm ${enabled ? "text-moss/70 border-moss/30" : "text-faint/40 border-border/20"}`}>
+                          {t("skills.installedBadge")}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
             </div>
           );
         })}

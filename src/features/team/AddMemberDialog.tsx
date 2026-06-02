@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTeamStore } from "@/store/team";
+import { getEnabledSkillNames } from "@/store/console";
 
 type AddMemberDialogProps = {
   teamId: string;
@@ -26,6 +27,7 @@ export function AddMemberDialog({ teamId, onClose }: AddMemberDialogProps) {
         agentName: name,
         role: "member",
         description: description.trim(),
+        skills: getEnabledSkillNames() ?? null,
       });
       addAgent({
         name,

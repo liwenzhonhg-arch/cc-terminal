@@ -47,6 +47,33 @@ export type HookEntry = {
 
 export type SkillFilter = "all" | "installed";
 
+export type SkillToggleConfig = {
+  masterEnabled: boolean;
+  disabledSkills: string[];
+};
+
+const SKILL_TOGGLES_KEY = "cc-skill-toggles";
+
+function isSkillToggleConfig(v: unknown): v is SkillToggleConfig {
+  if (typeof v !== "object" || v === null) return false;
+  const obj = v as Record<string, unknown>;
+  return typeof obj.masterEnabled === "boolean" && Array.isArray(obj.disabledSkills);
+}
+
+function loadToggleConfig(): SkillToggleConfig {
+  try {
+    const raw = localStorage.getItem(SKILL_TOGGLES_KEY);
+    if (!raw) return { masterEnabled: true, disabledSkills: [] };
+    const parsed: unknown = JSON.parse(raw);
+    if (isSkillToggleConfig(parsed)) return parsed;
+  } catch { /* ignore */ }
+  return { masterEnabled: true, disabledSkills: [] };
+}
+
+function saveToggleConfig(config: SkillToggleConfig) {
+  localStorage.setItem(SKILL_TOGGLES_KEY, JSON.stringify(config));
+}
+
 export type SkillGroupConfig = {
   groupNames: Record<string, string>;
   skillGroups: Record<string, string>;
@@ -102,6 +129,8 @@ type ConsoleState = {
   selectedHookIndex: number | null;
 
   skillGroupConfig: SkillGroupConfig;
+  skillToggleConfig: SkillToggleConfig;
+  pendingSkills: string[];
 
   loadSkills: () => Promise<void>;
   loadMcpServers: (cwd?: string) => Promise<void>;
@@ -116,6 +145,13 @@ type ConsoleState = {
   setGroupDisplayName: (groupKey: string, displayName: string) => void;
   setSkillGroup: (skillName: string, groupKey: string) => void;
   resetSkillGroupConfig: () => void;
+  setMasterEnabled: (enabled: boolean) => void;
+  toggleSkill: (name: string) => void;
+  enableAllSkills: () => void;
+  disableAllSkills: () => void;
+  addPendingSkill: (name: string) => void;
+  removePendingSkill: (name: string) => void;
+  clearPendingSkills: () => void;
 };
 
 export const useConsoleStore = create<ConsoleState>((set) => ({
@@ -138,6 +174,8 @@ export const useConsoleStore = create<ConsoleState>((set) => ({
   selectedHookIndex: null,
 
   skillGroupConfig: loadGroupConfig(),
+  skillToggleConfig: loadToggleConfig(),
+  pendingSkills: [],
 
   loadSkills: async () => {
     set({ skillsLoading: true });
@@ -210,4 +248,64 @@ export const useConsoleStore = create<ConsoleState>((set) => ({
     saveGroupConfig(config);
     return { skillGroupConfig: config };
   }),
+
+  setMasterEnabled: (enabled) => set((state) => {
+    const config = { ...state.skillToggleConfig, masterEnabled: enabled };
+    saveToggleConfig(config);
+    return {
+      skillToggleConfig: config,
+      ...(enabled ? {} : { pendingSkills: [] }),
+    };
+  }),
+
+  toggleSkill: (name) => set((state) => {
+    const disabled = state.skillToggleConfig.disabledSkills;
+    const isBeingDisabled = !disabled.includes(name);
+    const next = isBeingDisabled
+      ? [...disabled, name]
+      : disabled.filter((n) => n !== name);
+    const config = { ...state.skillToggleConfig, disabledSkills: next };
+    saveToggleConfig(config);
+    return {
+      skillToggleConfig: config,
+      pendingSkills: isBeingDisabled
+        ? state.pendingSkills.filter((n) => n !== name)
+        : state.pendingSkills,
+    };
+  }),
+
+  enableAllSkills: () => set((state) => {
+    const config = { ...state.skillToggleConfig, disabledSkills: [] };
+    saveToggleConfig(config);
+    return { skillToggleConfig: config };
+  }),
+
+  disableAllSkills: () => set((state) => {
+    const config = {
+      ...state.skillToggleConfig,
+      disabledSkills: state.skills.map((s) => s.name),
+    };
+    saveToggleConfig(config);
+    return { skillToggleConfig: config, pendingSkills: [] };
+  }),
+
+  addPendingSkill: (name) => set((state) => {
+    if (state.pendingSkills.includes(name)) return state;
+    return { pendingSkills: [...state.pendingSkills, name] };
+  }),
+
+  removePendingSkill: (name) => set((state) => ({
+    pendingSkills: state.pendingSkills.filter((n) => n !== name),
+  })),
+
+  clearPendingSkills: () => set({ pendingSkills: [] }),
 }));
+
+export function getEnabledSkillNames(): string[] | undefined {
+  const { skillToggleConfig, skills } = useConsoleStore.getState();
+  if (!skillToggleConfig.masterEnabled) return [];
+  if (skillToggleConfig.disabledSkills.length === 0) return undefined;
+  return skills
+    .filter((s) => !skillToggleConfig.disabledSkills.includes(s.name))
+    .map((s) => s.name);
+}

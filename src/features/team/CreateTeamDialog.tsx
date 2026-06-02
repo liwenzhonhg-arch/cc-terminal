@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAgentStore } from "@/store/agents";
+import { getEnabledSkillNames } from "@/store/console";
 
 type CreateTeamDialogProps = {
   defaultCwd: string;
@@ -32,6 +33,7 @@ export function CreateTeamDialog({ defaultCwd, onClose }: CreateTeamDialogProps)
         agentName: "lead",
         role: "lead",
         description: tlDescription.trim(),
+        skills: getEnabledSkillNames() ?? null,
       });
 
       addTeamEntry({ id: teamId, name: name.trim(), cwd: defaultCwd });

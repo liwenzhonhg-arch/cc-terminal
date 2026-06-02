@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { useAgentStore, type ThreadStatus } from "@/store/agents";
+import { useConsoleStore, getEnabledSkillNames } from "@/store/console";
 import { MessageBlock, StatusIndicator } from "./messages";
 import { Composer } from "./Composer";
 import { ThreadTabBar } from "@/components/ThreadTabBar";
@@ -37,6 +38,48 @@ export function ThreadView() {
       loadSessionMessages(activeThreadId);
     }
   }, [activeThreadId, thread?.sessionId, thread?.messages.length, thread?.agentId, loadSessionMessages]);
+
+  // Auto-detect git changes when agent finishes (once per completion cycle)
+  const gitNotifiedRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!activeThreadId || !thread) return;
+
+    // Clear the flag when thread leaves "done" so the next completion re-triggers
+    if (thread.status !== "done") {
+      gitNotifiedRef.current.delete(activeThreadId);
+      return;
+    }
+
+    if (gitNotifiedRef.current.has(activeThreadId)) return;
+    gitNotifiedRef.current.add(activeThreadId);
+
+    let cancelled = false;
+    const threadId = activeThreadId;
+    const cwd = thread.cwd;
+
+    invoke<{ isClean: boolean; files: { path: string; status: string; staged: boolean }[] }>(
+      "git_status",
+      { cwd }
+    )
+      .then((result) => {
+        if (cancelled || result.isClean) return;
+        appendMessage(threadId, {
+          id: crypto.randomUUID(),
+          role: "git_notify",
+          content: `${result.files.length} files changed`,
+          timestamp: Date.now(),
+          raw: { files: result.files, cwd },
+        });
+      })
+      .catch((err) => {
+        console.debug("[git auto-detect] skipped:", err);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeThreadId, thread?.status, thread?.cwd, appendMessage]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -148,6 +191,8 @@ export function ThreadView() {
             cacheRead: msg.cacheRead as number,
             cacheWrite: msg.cacheWrite as number,
             costUsd: msg.costUsd as number,
+            durationMs: (msg.durationMs as number) || 0,
+            durationApiMs: (msg.durationApiMs as number) || 0,
           });
           if (msg.sessionId) {
             setSessionId(threadId, msg.sessionId as string);
@@ -223,16 +268,26 @@ export function ThreadView() {
         timestamp: Date.now(),
       });
 
-      const userLine = JSON.stringify({ type: "user", content });
+      const pending = useConsoleStore.getState().pendingSkills;
+      let agentContent = content;
+      if (pending.length > 0) {
+        const skillList = pending.map((s) => `/${s}`).join(", ");
+        agentContent = `Use the following skills for this task: ${skillList}\n\n${content}`;
+        useConsoleStore.getState().clearPendingSkills();
+      }
+
+      const userLine = JSON.stringify({ type: "user", content: agentContent });
 
       if (!thread.agentId) {
         try {
+          const enabledSkills = getEnabledSkillNames();
           const helloMsg = JSON.stringify({
             type: "hello",
             cwd: thread.cwd,
             model: thread.model,
             permissionMode: "acceptEdits",
             ...(thread.sessionId ? { sessionId: thread.sessionId } : {}),
+            ...(enabledSkills !== undefined ? { skills: enabledSkills } : {}),
           });
 
           const agentId = await invoke<string>("spawn_agent", {

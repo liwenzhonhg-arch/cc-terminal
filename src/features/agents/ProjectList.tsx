@@ -366,6 +366,12 @@ export function ProjectList({ width }: { width: number }) {
           onClick={() => togglePanel("hooks")}
         />
         <SidebarButton
+          icon="⊕"
+          label={t("panel.git")}
+          active={rightPanelTabs.includes("git")}
+          onClick={() => togglePanel("git")}
+        />
+        <SidebarButton
           icon="⚙"
           label={t("sidebar.settings")}
           active={rightPanelTabs.includes("settings")}
