@@ -38,6 +38,9 @@ src-tauri/gen/
 # v2 sidecar build output
 agent-sidecar/dist/
 
+# Sidecar binaries (built locally)
+src-tauri/binaries/
+
 # worktree isolation directories
 .cc-terminal-worktrees/
 
