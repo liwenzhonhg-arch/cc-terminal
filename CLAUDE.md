@@ -145,7 +145,7 @@ cc-terminal 不包 CLI，但要覆盖等价能力。每项 CLI 功能标记为�
 | 样式 | TailwindCSS + CSS Variables | 主题切换无负担 |
 | 状态管理 | Zustand | 轻量、无样板 |
 | 消息渲染 | `react-markdown` + `shiki` | Markdown + 代码块语法高亮 + tool-call 卡片 |
-| 图表 | Recharts | Token 看板用 |
+| UI 组件基座 | shadcn/ui（Radix + cva + tailwind-merge） | headless 无障碍原语 + Operator Console 主题 |
 | 包管理 | pnpm | 锁文件稳定、磁盘友好 |
 
 ---
@@ -221,11 +221,26 @@ cc-terminal/
 │   ├── main.tsx
 │   ├── App.tsx
 │   ├── components/            # 通用 UI 组件（PascalCase 文件夹）
+│   │   ├── ui/                # shadcn/ui 基础组件（Radix 原语 + Operator Console 主题）
+│   │   │   ├── button.tsx     # Button（amber default / vermilion destructive / outline / ghost）
+│   │   │   ├── dialog.tsx     # Dialog（Radix Dialog，serif 标题，无 shadow）
+│   │   │   ├── command.tsx    # Command（cmdk，mono 字体，slash 命令 + 全局面板）
+│   │   │   ├── dropdown-menu.tsx # DropdownMenu（项目切换等）
+│   │   │   ├── scroll-area.tsx   # ScrollArea（4px 细滚动条）
+│   │   │   ├── tooltip.tsx    # Tooltip（surface-raised bg，mono 字体）
+│   │   │   ├── separator.tsx  # Separator（border/50 细线）
+│   │   │   ├── badge.tsx      # Badge（amber/vermilion/moss/outline 变体）
+│   │   │   ├── sheet.tsx      # Sheet（右侧 overlay 面板）
+│   │   │   ├── tabs.tsx       # Tabs（amber 下划线激活态）
+│   │   │   ├── input.tsx      # Input（mono 字体，border-border）
+│   │   │   ├── textarea.tsx   # Textarea（同 Input 风格）
+│   │   │   └── collapsible.tsx # Collapsible（Radix 折叠）
 │   │   ├── StatusBar.tsx      # 顶部 statusline（保留）
 │   │   ├── TokenGauge.tsx     # token 三段彩条（保留，记忆点）
-│   │   ├── ThemeToggle.tsx    # 主题切换（保留）
-│   │   ├── ConfirmDialog.tsx  # 写操作确认对话框（红线合规）
-│   │   ├── SlashCommandPopup.tsx # Slash 命令自动补全弹窗
+│   │   ├── ThemeToggle.tsx    # 主题切换（Zustand settings store 驱动）
+│   │   ├── ConfirmDialog.tsx  # 写操作确认对话框（shadcn Dialog 封装）
+│   │   ├── CommandPalette.tsx # 全局命令面板（Ctrl+K，cmdk 驱动）
+│   │   ├── SlashCommandPopup.tsx # Slash 命令自动补全弹窗（cmdk 驱动）
 │   │   ├── ResizeDivider.tsx  # 可拖拽分割线（水平/垂直）
 │   │   ├── ThreadTabBar.tsx  # 中栏 VS Code 风格标签页
 │   │   └── SettingsPanel.tsx # 设置面板（语言选择器）
@@ -250,7 +265,8 @@ cc-terminal/
 │   │       └── CreateTeamDialog.tsx     # 创建 Team 对话框（主窗口触发）
 │   ├── lib/                   # 通用工具（fmt、time、cost-calc、commands）
 │   │   ├── commands.ts        # Slash 命令注册表 + 执行逻辑
-│   │   └── useSlashCommands.ts # 共享 hook：命令检测 / 过滤 / 键盘导航
+│   │   ├── useSlashCommands.ts # 共享 hook：命令检测 / 过滤 / 键盘导航
+│   │   └── utils.ts           # cn() 工具函数（clsx + tailwind-merge）
 │   ├── i18n/                  # 国际化（Zustand + 对象映射）
 │   │   ├── zh.ts              # 中文翻译（默认语言，导出 TranslationKey 类型）
 │   │   ├── en.ts              # 英文翻译（类型受 zh.ts 约束）
@@ -259,7 +275,7 @@ cc-terminal/
 │   │   ├── agents.ts          # Zustand：projects / threads / activeThreadId
 │   │   ├── console.ts         # Zustand：skills / mcpServers / plugins / hooks
 │   │   ├── git.ts             # Zustand：git 状态 / diff / commit / PR
-│   │   ├── settings.ts        # Zustand：locale + localStorage 持久化
+│   │   ├── settings.ts        # Zustand：locale + theme + localStorage 持久化
 │   │   └── team.ts            # Zustand：team config / agents / messages
 │   └── styles/                # tailwind base + 主题变量
 ├── src-tauri/                 # Rust 后端
@@ -438,6 +454,7 @@ pnpm typecheck       # tsc --noEmit
 | 2026-05-22 | i18n 国际化 | Zustand + 对象映射（不引入 react-i18next）。2 种语言、~200 个 key。`useT()` hook 订阅 locale 变化自动重渲染；`t()` 函数供非组件代码使用。翻译 key 类型安全（`TranslationKey = keyof typeof zh`）。设置面板语言选择器，`/config` 命令激活 |
 | 2026-05-22 | Hooks 只读面板 | 与 Skills/MCP/Plugins 并列，读取 3 个 settings 文件（全局 + 项目 + 项目本地）的 hooks 字段，按事件类型分组展示。只读，不写 settings.json（红线合规）。图标 `↪`，`/hooks` 命令激活 |
 | 2026-05-23 | Agent 自动 Commit + PR | Rust 后端 `commands/git.rs` 通过 `std::process::Command` 调 `git`/`gh` CLI（不引入 git2 crate）。7 个命令：status/diff/stage/commit/push/pr_create/gh_auth。前端：右面板 Git Panel + 对话流 git_notify 消息 + `/commit` `/pr` 命令。Agent done 时自动检测变更，所有写操作经 ConfirmDialog 确认。路径参数校验防穿越 |
+| 2026-06-02 | UI 重设计：引入 shadcn/ui | 参考 Opcode（22k stars）和 Terax 验证的 Tauri + shadcn/ui 路线。保留 Operator Console 设计语言，用 shadcn/ui（Radix + cva + tailwind-merge + cmdk）替换手写基础组件。新增 13 个 ui 原语（Button/Dialog/Command/DropdownMenu/ScrollArea/Tooltip/Separator/Badge/Sheet/Tabs/Input/Textarea/Collapsible）、CommandPalette（Ctrl+K）、theme 提升到 Zustand settings store。Tailwind 保持 v3.4 不升 v4（降低迁移风险） |
 
 后续重大决策一律追加到本表，**先改文档，再改实现**。
 

@@ -45,34 +45,45 @@ export function ToolCard({ message }: { message: Message }) {
         ? "?"
         : toolName === "Edit" || toolName === "Write"
           ? "~"
-          : ">";
+          : "▸";
 
   return (
     <div className="mb-3 group">
       <button
+        type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-1.5 py-1 text-left hover:bg-surface-raised/40 -mx-1 px-1 rounded transition-colors"
+        className={`w-full flex items-center gap-2 py-2 px-3 rounded-sm border cursor-pointer transition-all duration-150 text-left ${
+          open
+            ? "bg-surface-raised border-border-strong"
+            : "bg-surface-raised/60 border-border hover:border-amber/40"
+        }`}
       >
-        <span className="font-mono text-2xs text-amber/70 w-3 text-center shrink-0 select-none">
+        <span className="font-mono text-2xs text-amber w-3 text-center shrink-0 select-none">
           {icon}
         </span>
-        <span className="font-mono text-xs text-ink/80 font-medium">
+        <span className="font-mono text-[11px] text-ink font-medium">
           {toolName}
         </span>
         {detail && (
-          <span className="font-mono text-2xs text-muted truncate ml-1">
+          <span className="font-mono text-[10px] text-faint truncate flex-1 ml-1">
             {detail}
           </span>
         )}
-        <span className="ml-auto font-mono text-2xs text-faint opacity-0 group-hover:opacity-100 transition-opacity select-none">
+        <span className="font-mono text-[10px] text-faint opacity-0 group-hover:opacity-100 transition-opacity select-none shrink-0">
           {open ? t("tool.fold") : t("tool.peek")}
         </span>
       </button>
 
       {open && body && (
-        <div className="mt-1 ml-[18px] border-l border-border/60 pl-3">
-          <pre className="py-2.5 px-3 text-xs font-mono text-ink/85 bg-surface-raised rounded overflow-x-auto max-h-[280px] overflow-y-auto whitespace-pre-wrap break-words leading-relaxed">
-            {body}
+        <div className="mt-0 border-x border-b border-border-strong rounded-b-sm overflow-hidden">
+          <pre className="py-2.5 px-3 text-[11px] font-mono text-muted bg-surface-raised overflow-x-auto max-h-[240px] overflow-y-auto whitespace-pre-wrap break-words leading-relaxed">
+            {body.split("\n").map((line, i) => {
+              let cls = "";
+              if (line.startsWith("+") && !line.startsWith("+++")) cls = "text-moss";
+              else if (line.startsWith("-") && !line.startsWith("---")) cls = "text-vermilion";
+              else if (line.startsWith("@@")) cls = "text-cyan/70";
+              return <div key={i} className={cls}>{line}</div>;
+            })}
           </pre>
         </div>
       )}

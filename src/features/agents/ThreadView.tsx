@@ -373,17 +373,17 @@ export function ThreadView() {
     return (
       <div className="flex-1 flex flex-col min-w-0 relative bg-surface-chat">
         <ThreadTabBar />
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 select-none">
-          <span className="font-mono text-2xs text-border/60 tracking-widest uppercase">
+        <div className="cc-fade-up flex-1 flex flex-col items-center justify-center gap-3 select-none">
+          <span className="font-mono text-[10px] text-border-strong tracking-[0.12em] uppercase">
             cc-terminal
           </span>
-          <p className="font-serif text-lg text-ink/80">
-            Hello! Start a new conversation
+          <p className="font-serif text-xl text-ink/80 font-normal">
+            Start a new conversation
           </p>
-          <p className="font-mono text-2xs text-faint">
-            Type a message below to begin
+          <p className="font-mono text-[11px] text-faint">
+            Type below to begin · <kbd className="px-1.5 py-0.5 bg-surface-raised border border-border-strong rounded-sm text-[10px] text-amber">Ctrl+K</kbd> command palette
           </p>
-          <span className="inline-block w-[2px] h-4 bg-muted/30 animate-[blink_1.06s_steps(2)_infinite]" />
+          <span className="inline-block w-[2px] h-4 bg-faint/40 animate-[blink_1.06s_steps(2)_infinite] mt-1" />
         </div>
         <Composer
           isWorking={false}
@@ -402,14 +402,14 @@ export function ThreadView() {
     <div className="flex-1 flex flex-col min-w-0 relative bg-surface-chat">
       <ThreadTabBar />
       <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto">
-        <div className="max-w-[72ch] mx-auto pt-6 pb-6 px-4 sm:px-6">
+        <div className="max-w-[680px] mx-auto pt-6 pb-6 px-4 sm:px-6">
           {thread.messages.map((msg, i) => (
             <div
               key={msg.id}
-              className="animate-[fadeIn_180ms_ease-out]"
+              className="cc-fade-up"
               style={{
                 animationFillMode: "backwards",
-                animationDelay: `${Math.min(i * 20, 200)}ms`,
+                animationDelay: `${Math.min(i * 30, 300)}ms`,
               }}
             >
               <MessageBlock message={msg} />
@@ -425,7 +425,7 @@ export function ThreadView() {
       {showScrollBtn && (
         <button
           onClick={scrollToBottom}
-          className="absolute right-6 bottom-28 w-7 h-7 flex items-center justify-center rounded-sm border border-border bg-surface text-muted hover:text-ink hover:border-ink/20 transition-colors font-mono text-xs"
+          className="cc-press cc-fade-up absolute right-6 bottom-28 w-7 h-7 flex items-center justify-center rounded-sm border border-border bg-surface text-muted hover:text-ink hover:border-ink/20 hover:shadow-[0_2px_8px_rgb(var(--cc-border)/0.3)] transition-all duration-150 font-mono text-xs"
           title="Scroll to bottom"
         >
           ↓

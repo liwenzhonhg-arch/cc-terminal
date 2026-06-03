@@ -2,6 +2,16 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAgentStore } from "@/store/agents";
 import { getEnabledSkillNames } from "@/store/console";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type CreateTeamDialogProps = {
   defaultCwd: string;
@@ -47,26 +57,23 @@ export function CreateTeamDialog({ defaultCwd, onClose }: CreateTeamDialogProps)
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
-      <div className="relative bg-surface border-2 border-border rounded-sm w-[400px] max-w-[90vw] shadow-lg">
-        <div className="px-4 py-3 border-b border-border/50">
-          <h3 className="font-serif text-sm text-ink">Create Team</h3>
-        </div>
+    <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-[400px]">
+        <DialogHeader>
+          <DialogTitle>Create Team</DialogTitle>
+        </DialogHeader>
 
         <div className="px-4 py-4 space-y-4">
           <div>
             <label className="block font-mono text-2xs text-muted mb-1">
               Team Name
             </label>
-            <input
-              type="text"
+            <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Refactoring Squad"
-              className="w-full bg-surface-raised/80 border border-border rounded-sm px-3 py-2 font-sans text-sm text-ink placeholder:text-faint focus:outline-none focus:border-ink/20"
               autoFocus
+              className="font-sans text-sm"
             />
           </div>
 
@@ -74,11 +81,11 @@ export function CreateTeamDialog({ defaultCwd, onClose }: CreateTeamDialogProps)
             <label className="block font-mono text-2xs text-muted mb-1">
               Team Lead Description
             </label>
-            <textarea
+            <Textarea
               value={tlDescription}
               onChange={(e) => setTlDescription(e.target.value)}
               rows={3}
-              className="w-full bg-surface-raised/80 border border-border rounded-sm px-3 py-2 font-sans text-sm text-ink placeholder:text-faint focus:outline-none focus:border-ink/20 resize-none"
+              className="font-sans text-sm resize-none"
             />
             <span className="font-mono text-2xs text-faint mt-0.5 block">
               Injected as TL system prompt. Members can be added after creation.
@@ -98,22 +105,19 @@ export function CreateTeamDialog({ defaultCwd, onClose }: CreateTeamDialogProps)
           )}
         </div>
 
-        <div className="px-4 py-3 border-t border-border/50 flex items-center justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="font-mono text-xs text-muted hover:text-ink px-3 py-1.5 border border-border/50 rounded-sm transition-colors"
-          >
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            size="sm"
             onClick={handleCreate}
             disabled={!name.trim() || !tlDescription.trim() || loading}
-            className="font-mono text-xs text-white bg-amber hover:bg-amber/80 disabled:opacity-50 px-3 py-1.5 rounded-sm transition-colors"
           >
             {loading ? "Creating..." : "Create & Open"}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

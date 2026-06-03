@@ -1,6 +1,9 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useConsoleStore, type SkillEntry } from "@/store/console";
 import { ResizeDivider } from "@/components/ResizeDivider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useT } from "@/i18n";
 
 export function SkillsPanelContent() {
@@ -132,35 +135,28 @@ export function SkillsPanelContent() {
           </span>
         </div>
         <div className="flex items-center gap-1.5">
-          <button
+          <Badge
+            variant={toggleConfig.masterEnabled ? "success" : "outline"}
+            className="cursor-pointer"
             onClick={() => setMasterEnabled(!toggleConfig.masterEnabled)}
-            className={`font-mono text-2xs px-1.5 py-0.5 border transition-colors ${
-              toggleConfig.masterEnabled
-                ? "text-moss border-moss/30 hover:bg-moss/10"
-                : "text-faint border-border/50 hover:text-ink"
-            }`}
             title={t("skills.masterToggle")}
           >
             {toggleConfig.masterEnabled ? t("skills.on") : t("skills.off")}
-          </button>
-          <button
-            onClick={() => loadSkills()}
-            className="font-mono text-2xs text-muted hover:text-ink transition-colors px-1.5 py-0.5"
-            title={t("skills.refresh")}
-          >
-            {"↻"}
-          </button>
+          </Badge>
+          <Button variant="ghost" size="sm" onClick={() => loadSkills()} title={t("skills.refresh")}>
+            ↻
+          </Button>
         </div>
       </div>
 
       {/* Search */}
       <div className="px-3 py-2 border-b border-border/50 shrink-0">
-        <input
+        <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={t("skills.searchPlaceholder")}
-          className="w-full bg-transparent border border-border/50 rounded-sm px-2 py-1 font-mono text-2xs text-ink placeholder:text-faint focus:outline-none focus:border-amber/50"
+          className="text-2xs h-7"
         />
         <div className="flex items-center gap-3 mt-1.5">
           {(["all", "installed"] as const).map((f) => (

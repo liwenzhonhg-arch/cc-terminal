@@ -3,6 +3,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { StatusBar } from "./StatusBar";
 import { ResizeDivider } from "./ResizeDivider";
 import { RightPanelContainer } from "./RightPanelContainer";
+import { CommandPalette } from "./CommandPalette";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProjectList } from "@/features/agents/ProjectList";
 import { ThreadView } from "@/features/agents/ThreadView";
 import { TeamChatContent } from "@/features/team/TeamChatContent";
@@ -77,7 +79,9 @@ export function AppShell() {
   }, [addThread]);
 
   return (
-    <div className="cc-grain relative h-full w-full bg-surface text-ink overflow-hidden flex flex-col">
+    <TooltipProvider delayDuration={300}>
+    <div className="cc-grain relative h-full w-full bg-cc-bg text-ink overflow-hidden flex flex-col">
+      <CommandPalette />
       <StatusBar
         tokens={activeTeamId ? { input: null, output: null, cache: null } : {
           input: activeThread?.usage.input ?? null,
@@ -106,5 +110,6 @@ export function AppShell() {
         )}
       </div>
     </div>
+    </TooltipProvider>
   );
 }
