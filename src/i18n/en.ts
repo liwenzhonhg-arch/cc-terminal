@@ -311,6 +311,16 @@ export const en: Record<TranslationKey, string> = {
   "cmd.commitOpened": "Git panel opened.",
   "cmd.prOpened": "Git panel opened (PR mode).",
 
+  // CommandPalette
+  "cmdPalette.placeholder": "Type a command or search threads...",
+  "cmdPalette.noResults": "No results found",
+  "cmdPalette.threads": "Switch Thread",
+  "cmdPalette.actions": "Actions",
+  "cmdPalette.commands": "Commands",
+  "cmdPalette.newThread": "New Thread",
+  "cmdPalette.toggleTheme": "Toggle Theme",
+  "cmd.noResults": "No matching commands",
+
   // ThreadTabBar
   "threadTab.closeTab": "Close tab",
 

@@ -2,6 +2,16 @@ import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTeamStore } from "@/store/team";
 import { getEnabledSkillNames } from "@/store/console";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type AddMemberDialogProps = {
   teamId: string;
@@ -45,25 +55,21 @@ export function AddMemberDialog({ teamId, onClose }: AddMemberDialogProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-
-      <div className="relative bg-surface border-2 border-border rounded-sm w-[380px] max-w-[90vw] shadow-lg">
-        <div className="px-4 py-3 border-b border-border/50">
-          <h3 className="font-serif text-sm text-ink">Add Team Member</h3>
-        </div>
+    <Dialog open onOpenChange={(v) => { if (!v) onClose(); }}>
+      <DialogContent className="max-w-[380px]">
+        <DialogHeader>
+          <DialogTitle>Add Team Member</DialogTitle>
+        </DialogHeader>
 
         <div className="px-4 py-4 space-y-4">
           <div>
             <label className="block font-mono text-2xs text-muted mb-1">
               Name (@mention identifier)
             </label>
-            <input
-              type="text"
+            <Input
               value={name}
               onChange={(e) => setName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
               placeholder="frontend"
-              className="w-full bg-surface-raised/80 border border-border rounded-sm px-3 py-2 font-mono text-sm text-ink placeholder:text-faint focus:outline-none focus:border-ink/20"
               autoFocus
             />
             {name && !isValidName && (
@@ -77,12 +83,12 @@ export function AddMemberDialog({ teamId, onClose }: AddMemberDialogProps) {
             <label className="block font-mono text-2xs text-muted mb-1">
               Description (injected as system prompt)
             </label>
-            <textarea
+            <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Frontend specialist. Handles React components, CSS, and UI implementation."
               rows={3}
-              className="w-full bg-surface-raised/80 border border-border rounded-sm px-3 py-2 font-sans text-sm text-ink placeholder:text-faint focus:outline-none focus:border-ink/20 resize-none"
+              className="font-sans text-sm resize-none"
             />
           </div>
 
@@ -93,22 +99,20 @@ export function AddMemberDialog({ teamId, onClose }: AddMemberDialogProps) {
           )}
         </div>
 
-        <div className="px-4 py-3 border-t border-border/50 flex items-center justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="font-mono text-xs text-muted hover:text-ink px-3 py-1.5 border border-border/50 rounded-sm transition-colors"
-          >
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={onClose}>
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
+            size="sm"
+            className="bg-moss hover:bg-moss/80 text-white"
             onClick={handleSubmit}
             disabled={!isValidName || !description.trim() || loading}
-            className="font-mono text-xs text-white bg-moss hover:bg-moss/80 disabled:opacity-50 px-3 py-1.5 rounded-sm transition-colors"
           >
             {loading ? "Spawning..." : "Add"}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

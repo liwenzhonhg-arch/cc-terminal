@@ -37,19 +37,20 @@
   body {
     font-family: theme("fontFamily.sans");
     font-weight: 500;
-    font-size: 1rem;
+    font-size: 13px;
     line-height: 1.5;
     color: rgb(var(--cc-ink));
-    background-color: rgb(var(--cc-surface));
+    background-color: rgb(var(--cc-bg));
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
   }
 
   ::selection {
-    background-color: rgb(var(--cc-ink) / 0.85);
-    color: rgb(var(--cc-surface));
+    background-color: rgb(var(--cc-ink) / 0.15);
+    color: rgb(var(--cc-ink));
   }
 
-  /* Scrollbars — thin, mono-aesthetic */
+  /* Scrollbars — thin, 4px */
   ::-webkit-scrollbar {
     width: 4px;
     height: 4px;
@@ -58,11 +59,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgb(var(--cc-border));
+    background: rgb(var(--cc-border-strong));
     border-radius: 0;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgb(var(--cc-muted) / 0.7);
+    background: rgb(var(--cc-faint));
   }
   ::-webkit-scrollbar-corner {
     background: transparent;

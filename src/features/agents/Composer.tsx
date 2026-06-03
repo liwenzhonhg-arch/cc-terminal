@@ -5,6 +5,8 @@ import { useT } from "@/i18n";
 import { useSlashCommands } from "@/lib/useSlashCommands";
 import { executeOrForward, type CommandContext } from "@/lib/commands";
 import { SlashCommandPopup } from "@/components/SlashCommandPopup";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 type ComposerProps = {
   isWorking: boolean;
@@ -98,33 +100,30 @@ export function Composer({ isWorking, cwd, model, threadId, agentId, onSend, onI
 
   return (
     <div className="shrink-0 border-t border-border bg-surface-chat">
-      <div className="max-w-[72ch] mx-auto px-4 sm:px-6 py-4">
+      <div className="max-w-[680px] mx-auto px-6 py-4">
         <div className="relative">
           {pendingSkills.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1 mb-1.5 px-1">
-              <span className="font-mono text-2xs text-faint select-none mr-0.5">
-                {t("composer.skills")}:
+            <div className="flex flex-wrap items-center gap-1.5 mb-2 px-1">
+              <span className="font-mono text-[10px] text-faint select-none uppercase tracking-operator">
+                {t("composer.skills")}
               </span>
               {pendingSkills.map((name) => (
-                <span
-                  key={name}
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 font-mono text-2xs text-amber border border-amber/30 bg-amber/5"
-                >
+                <Badge key={name} variant="default" className="gap-1">
                   /{name}
                   <button
                     onClick={() => removePendingSkill(name)}
-                    className="text-faint hover:text-ink transition-colors leading-none"
+                    className="text-amber/60 hover:text-ink transition-colors leading-none"
                     type="button"
                   >
-                    ×
+                    x
                   </button>
-                </span>
+                </Badge>
               ))}
             </div>
           )}
 
-          <span className="absolute left-3 top-3 font-mono text-xs text-muted select-none pointer-events-none">
-            {isWorking ? "···" : ">"}
+          <span className="absolute left-3.5 top-3 font-mono text-[13px] text-faint select-none pointer-events-none">
+            {isWorking ? "..." : ">"}
           </span>
 
           <textarea
@@ -135,7 +134,7 @@ export function Composer({ isWorking, cwd, model, threadId, agentId, onSend, onI
             placeholder={isWorking ? t("composer.working") : t("composer.placeholder")}
             rows={1}
             disabled={isWorking}
-            className="w-full bg-surface-raised/80 border border-border rounded-sm pl-8 pr-20 py-2.5 font-sans text-sm text-ink placeholder:text-faint focus:outline-none focus:border-ink/20 disabled:opacity-50 resize-none min-h-[40px] max-h-[160px] transition-colors"
+            className="w-full bg-surface-raised border border-border rounded-sm pl-9 pr-24 py-3 font-sans text-[14px] text-ink placeholder:text-faint focus:outline-none focus:border-amber/50 focus:shadow-[0_0_0_1px_rgb(var(--cc-amber)/0.2)] disabled:opacity-40 resize-none min-h-[44px] max-h-[160px] transition-all duration-200"
           />
 
           {slash.showPopup && (
@@ -151,29 +150,37 @@ export function Composer({ isWorking, cwd, model, threadId, agentId, onSend, onI
             />
           )}
 
-          <div className="absolute right-2 bottom-2 flex items-center gap-1.5">
+          <div className="absolute right-2 bottom-2 flex items-center gap-1">
             {isWorking ? (
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={onInterrupt}
-                className="group flex items-center gap-1.5 px-2.5 py-1 font-mono text-2xs text-vermilion border border-vermilion/20 rounded hover:bg-vermilion/8 transition-colors"
+                className="text-vermilion border-vermilion/30 hover:bg-vermilion/10 gap-1.5"
               >
-                <span className="inline-block w-1.5 h-1.5 rounded-sm bg-vermilion group-hover:animate-pulse" />
+                <span className="inline-block w-1.5 h-1.5 rounded-sm bg-vermilion animate-pulse" />
                 Esc
-              </button>
+              </Button>
             ) : (
-              <button
-                onClick={handleSend}
-                disabled={!input.trim()}
-                className="px-2.5 py-1 font-mono text-2xs text-muted border border-transparent rounded hover:text-ink hover:border-border disabled:opacity-0 disabled:pointer-events-none transition-all"
-              >
-                Enter
-              </button>
+              <>
+                <Button variant="ghost" size="sm" className="text-faint hover:text-muted text-[10px]">
+                  Ctrl+K
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSend}
+                  disabled={!input.trim()}
+                  className="disabled:opacity-0"
+                >
+                  Enter
+                </Button>
+              </>
             )}
           </div>
         </div>
 
-        <div className="flex items-center justify-between mt-2 px-1 font-mono text-2xs text-muted cc-num">
-          <span className="truncate max-w-[50%]">{cwd}</span>
+        <div className="flex items-center justify-between mt-1.5 px-1 font-mono text-[10px] text-faint cc-num">
+          <span className="truncate max-w-[55%]">{cwd}</span>
           <span>{model}</span>
         </div>
       </div>

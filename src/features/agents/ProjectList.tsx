@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { useAgentStore, type ThreadStatus } from "@/store/agents";
@@ -6,6 +6,21 @@ import { useT } from "@/i18n";
 import { abbreviatePath, formatRelativeTime } from "@/lib/fmt";
 import { useSettingsStore } from "@/store/settings";
 import { CreateTeamDialog } from "@/features/team/CreateTeamDialog";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const STATUS_DOT: Record<ThreadStatus, { color: string; symbol: string }> = {
   idle: { color: "text-muted", symbol: "○" },
@@ -42,14 +57,11 @@ export function ProjectList({ width }: { width: number }) {
   const rightPanelTabs = useAgentStore((s) => s.rightPanelTabs);
   const togglePanel = useAgentStore((s) => s.togglePanel);
 
-  const [switcherOpen, setSwitcherOpen] = useState(false);
   const [showCreateTeam, setShowCreateTeam] = useState(false);
-  const switcherRef = useRef<HTMLDivElement>(null);
 
   const projectList = Object.values(projects);
   const currentProject = activeProjectId ? projects[activeProjectId] : projectList[0] ?? null;
 
-  // Ensure activeProjectId is set if it's null but projects exist
   useEffect(() => {
     if (!activeProjectId && projectList.length > 0) {
       const fallback = activeThreadId
@@ -58,18 +70,6 @@ export function ProjectList({ width }: { width: number }) {
       setActiveProject(fallback ?? projectList[0].id);
     }
   }, [activeProjectId, projectList.length, activeThreadId, threads, setActiveProject]);
-
-  // Close switcher on outside click
-  useEffect(() => {
-    if (!switcherOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (switcherRef.current && !switcherRef.current.contains(e.target as Node)) {
-        setSwitcherOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [switcherOpen]);
 
   const handleRemoveProject = async (projectId: string) => {
     const project = projects[projectId];
@@ -83,7 +83,6 @@ export function ProjectList({ width }: { width: number }) {
       }
     }
     removeProject(projectId);
-    setSwitcherOpen(false);
   };
 
   const handleRemoveThread = async (threadId: string) => {
@@ -112,7 +111,6 @@ export function ProjectList({ width }: { width: number }) {
     if (!path) return;
     const projectId = addProject(path, folderName(path));
     addThread(projectId, path);
-    setSwitcherOpen(false);
   };
 
   const getThreadsByProject = () => {
@@ -123,10 +121,10 @@ export function ProjectList({ width }: { width: number }) {
       .filter(Boolean);
 
     const active = projectThreads.filter(
-      (t) => t.agentId || t.status === "thinking" || t.status === "tool_use"
+      (th) => th.agentId || th.status === "thinking" || th.status === "tool_use"
     );
     const history = projectThreads
-      .filter((t) => !active.includes(t))
+      .filter((th) => !active.includes(th))
       .sort((a, b) => b.lastModified - a.lastModified);
 
     return { active, history };
@@ -135,59 +133,92 @@ export function ProjectList({ width }: { width: number }) {
   const { active, history } = getThreadsByProject();
 
   return (
-    <aside className="shrink-0 border-r border-border/30 bg-surface flex flex-col" style={{ width }}>
-      {/* Header — fixed */}
-      <div className="px-4 py-3 border-b-2 border-border flex items-center justify-between shrink-0">
-        <h2 className="font-serif text-sm text-ink">{t("sidebar.chats")}</h2>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={handleAddProject}
-            className="font-mono text-2xs text-muted border border-transparent hover:text-ink hover:border-border px-1.5 py-0.5 rounded-sm transition-colors"
-            title={t("sidebar.addFolderTooltip")}
-          >
-            {t("sidebar.addFolder")}
-          </button>
-        </div>
+    <aside className="shrink-0 border-r border-border bg-surface flex flex-col" style={{ width }}>
+      {/* Header */}
+      <div className="px-4 py-2.5 border-b border-border flex items-center justify-between shrink-0">
+        <span className="font-mono text-[10px] uppercase tracking-operator text-faint">{t("sidebar.chats")}</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="sm" onClick={handleAddProject}>
+              {t("sidebar.addFolder")}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t("sidebar.addFolderTooltip")}</TooltipContent>
+        </Tooltip>
       </div>
 
-      {/* Project selector — fixed */}
-      <div className="relative shrink-0 border-b-2 border-border" ref={switcherRef}>
-        <div className="flex items-center justify-between px-3 py-2">
+      {/* Project selector */}
+      <div className="shrink-0 border-b border-border">
+        <div className="flex items-center justify-between px-4 py-2">
           <button
             onClick={handleChangeFolder}
-            className="group flex-1 min-w-0 flex items-center gap-1.5 text-left"
-            title={currentProject ? t("sidebar.workingFolder", { path: currentProject.rootPath }) : ""}
+            className="group flex-1 min-w-0 flex items-center gap-2 text-left"
           >
-            <span className="font-sans text-sm font-semibold text-ink truncate">
+            <span className="w-[6px] h-[6px] rounded-full bg-amber shrink-0" />
+            <span className="font-sans text-[13px] font-semibold text-ink truncate">
               {currentProject?.name ?? t("sidebar.noProject")}
             </span>
-            {currentProject && (
-              <span className="font-mono text-2xs text-faint opacity-0 group-hover:opacity-100 transition-opacity shrink-0 select-none">
-                ↗
-              </span>
-            )}
           </button>
           <div className="flex items-center gap-0.5 shrink-0">
             {currentProject && (
-              <button
-                onClick={() => addThread(currentProject.id, currentProject.rootPath)}
-                className="font-mono text-sm font-bold text-muted border border-transparent hover:text-ink hover:border-border px-2 py-0.5 rounded-sm transition-colors"
-                title={t("sidebar.newChat")}
-              >
-                +
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="font-bold text-sm px-2"
+                    onClick={() => addThread(currentProject.id, currentProject.rootPath)}
+                  >
+                    +
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t("sidebar.newChat")}</TooltipContent>
+              </Tooltip>
             )}
-            <button
-              onClick={() => setSwitcherOpen(!switcherOpen)}
-              className={`font-mono text-2xs border px-1.5 py-0.5 rounded-sm transition-colors ${
-                switcherOpen
-                  ? "text-ink border-border bg-border/30"
-                  : "text-muted border-transparent hover:text-ink hover:border-border"
-              }`}
-              title={t("sidebar.switchProject")}
-            >
-              ⇅
-            </button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="px-1.5">
+                  ⇅
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-[220px]">
+                <DropdownMenuLabel>{t("sidebar.projects")}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {projectList.map((project) => {
+                  const isCurrent = project.id === currentProject?.id;
+                  const threadCount = project.threadIds.length;
+                  return (
+                    <DropdownMenuItem
+                      key={project.id}
+                      onSelect={() => setActiveProject(project.id)}
+                      className="flex-col items-start gap-0"
+                    >
+                      <span className="flex items-center gap-1.5 w-full">
+                        {isCurrent && <span className="text-amber text-2xs">●</span>}
+                        <span className="truncate font-medium">{project.name}</span>
+                        {!isCurrent && (
+                          <span
+                            onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleRemoveProject(project.id); }}
+                            className="ml-auto text-faint hover:text-vermilion cursor-pointer select-none"
+                          >
+                            ×
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-2xs text-faint truncate w-full">
+                        {abbreviatePath(project.rootPath)}
+                        {threadCount > 0 && t("sidebar.chatsCount", { count: threadCount })}
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleAddProject}>
+                  {t("sidebar.openFolder")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
@@ -198,67 +229,9 @@ export function ProjectList({ width }: { width: number }) {
             </span>
           </div>
         )}
-
-        {/* Project switcher popover */}
-        {switcherOpen && (
-          <div className="absolute left-2 right-2 top-full mt-1 z-50 border-2 border-border rounded-sm bg-surface shadow-lg max-h-[300px] overflow-y-auto">
-            <div className="px-3 py-2 border-b border-border/50">
-              <span className="font-mono text-2xs text-muted uppercase tracking-operator">{t("sidebar.projects")}</span>
-            </div>
-            {projectList.map((project) => {
-              const isCurrent = project.id === currentProject?.id;
-              const threadCount = project.threadIds.length;
-              return (
-                <div
-                  key={project.id}
-                  className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                    isCurrent
-                      ? "bg-border/60 text-ink"
-                      : "text-muted hover:text-ink hover:bg-border/40 cursor-pointer"
-                  }`}
-                >
-                  <button
-                    onClick={() => {
-                      setActiveProject(project.id);
-                      setSwitcherOpen(false);
-                    }}
-                    className="flex-1 min-w-0 text-left flex flex-col"
-                  >
-                    <span className="font-sans text-xs font-medium truncate flex items-center gap-1.5">
-                      {isCurrent && <span className="text-amber text-2xs">●</span>}
-                      {project.name}
-                    </span>
-                    <span className="font-mono text-2xs text-faint truncate">
-                      {abbreviatePath(project.rootPath)}
-                      {threadCount > 0 && t("sidebar.chatsCount", { count: threadCount })}
-                    </span>
-                  </button>
-                  {!isCurrent && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveProject(project.id);
-                      }}
-                      className="font-mono text-2xs text-faint hover:text-vermilion transition-colors shrink-0 select-none"
-                      title={t("sidebar.removeProject")}
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-            <button
-              onClick={handleAddProject}
-              className="w-full px-3 py-2 text-left font-mono text-2xs text-muted hover:text-ink hover:bg-border/40 transition-colors border-t border-border/50"
-            >
-              {t("sidebar.openFolder")}
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Thread list (scrollable) */}
+      {/* Thread list */}
       <div className="flex-1 min-h-0 flex flex-col overflow-y-auto">
         {sessionsLoading && (
           <div className="px-4 py-2 font-mono text-2xs text-faint animate-pulse">
@@ -289,7 +262,7 @@ export function ProjectList({ width }: { width: number }) {
         ))}
 
         {active.length > 0 && history.length > 0 && (
-          <div className="mx-3 my-1 border-t border-border/30" />
+          <Separator className="mx-3 my-1 w-auto" />
         )}
 
         {history.map((thread) => (
@@ -305,7 +278,7 @@ export function ProjectList({ width }: { width: number }) {
         {/* Teams */}
         {teamEntries.length > 0 && (
           <>
-            <div className="mx-3 mt-2 mb-1 border-t border-border/30" />
+            <Separator className="mx-3 mt-2 mb-1 w-auto" />
             <div className="px-3 py-1">
               <span className="font-mono text-2xs text-faint uppercase tracking-operator">
                 {t("sidebar.teams")}
@@ -315,14 +288,15 @@ export function ProjectList({ width }: { width: number }) {
               <button
                 key={entry.id}
                 onClick={() => setActiveTeamId(entry.id)}
-                className={`group w-full text-left px-3 py-1.5 flex items-center gap-2 font-mono text-xs transition-colors ${
+                data-active={activeTeamId === entry.id}
+                className={`cc-list-item cc-press group w-full text-left pl-4 pr-3 py-2 flex items-center gap-2.5 font-mono text-xs ${
                   activeTeamId === entry.id
-                    ? "bg-border/50 text-ink border-l-2 border-l-amber"
-                    : "text-muted hover:text-ink hover:bg-border/40"
+                    ? "bg-border/40 text-ink"
+                    : "text-muted hover:text-ink hover:bg-border/20"
                 }`}
               >
                 <span className="text-amber/70 shrink-0 text-2xs select-none">◈</span>
-                <span className="truncate">{entry.name}</span>
+                <span className="truncate font-medium">{entry.name}</span>
               </button>
             ))}
           </>
@@ -330,7 +304,7 @@ export function ProjectList({ width }: { width: number }) {
       </div>
 
       {/* Divider */}
-      <div className="border-t-2 border-border" />
+      <div className="border-t border-border" />
 
       {/* Lower section */}
       <div className="flex-1 min-h-0 flex flex-col px-3 py-3 gap-1">
@@ -340,7 +314,7 @@ export function ProjectList({ width }: { width: number }) {
           active={rightPanelTabs.includes("cost")}
           onClick={() => togglePanel("cost")}
         />
-        <div className="border-t border-border/30 my-1" />
+        <Separator className="my-1" />
         <SidebarButton
           icon="◇"
           label={t("panel.skills")}
@@ -377,7 +351,7 @@ export function ProjectList({ width }: { width: number }) {
           active={rightPanelTabs.includes("settings")}
           onClick={() => togglePanel("settings")}
         />
-        <div className="border-t border-border/30 my-1" />
+        <Separator className="my-1" />
         <SidebarButton
           icon="◈"
           label={t("sidebar.newTeam")}
@@ -407,19 +381,23 @@ function ThreadItem({ thread, isActive, onSelect, onRemove }: ThreadItemProps) {
   const t = useT();
   const locale = useSettingsStore((s) => s.locale);
   const dot = STATUS_DOT[thread.status];
+  const isRunning = thread.status === "thinking" || thread.status === "tool_use";
 
   return (
     <button
       onClick={onSelect}
-      className={`group w-full text-left px-3 py-1.5 flex items-center gap-2 font-mono text-xs transition-colors ${
+      data-active={isActive}
+      className={`cc-list-item cc-press group w-full text-left pl-4 pr-3 py-2 flex items-center gap-2.5 font-mono text-xs ${
         isActive
-          ? "bg-border/50 text-ink border-l-2 border-l-amber"
-          : "text-muted hover:text-ink hover:bg-border/40"
+          ? "bg-border/40 text-ink"
+          : "text-muted hover:text-ink hover:bg-border/20"
       }`}
     >
-      <span className={`${dot.color} shrink-0 text-2xs`}>{dot.symbol}</span>
-      <div className="flex-1 min-w-0 flex flex-col">
-        <span className="truncate">
+      <span className={`${dot.color} shrink-0 text-2xs ${isRunning ? "cc-dot-pulse" : ""}`}>
+        {dot.symbol}
+      </span>
+      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+        <span className="truncate font-medium">
           {thread.title ?? t("sidebar.newChatDefault")}
         </span>
         <span className="text-2xs text-faint truncate">
@@ -431,7 +409,7 @@ function ThreadItem({ thread, isActive, onSelect, onRemove }: ThreadItemProps) {
           e.stopPropagation();
           onRemove();
         }}
-        className="font-mono text-2xs text-faint opacity-0 group-hover:opacity-100 hover:text-vermilion transition-all shrink-0 cursor-pointer select-none"
+        className="font-mono text-2xs text-faint opacity-0 group-hover:opacity-100 hover:text-vermilion transition-all duration-150 shrink-0 cursor-pointer select-none"
         title={t("sidebar.close")}
       >
         ×
@@ -447,16 +425,15 @@ function SidebarButton({ icon, label, active, onClick }: {
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="sm"
+      data-active={active}
       onClick={onClick}
-      className={`w-full flex items-center gap-2 px-2 py-1.5 rounded-sm font-mono text-xs transition-colors ${
-        active
-          ? "bg-border/50 text-ink"
-          : "text-muted hover:text-ink hover:bg-border/40"
-      }`}
+      className={`cc-list-item w-full justify-start gap-2 pl-4 ${active ? "bg-border/40 text-ink" : ""}`}
     >
       <span className="text-amber/70 w-4 text-center shrink-0 select-none">{icon}</span>
       <span>{label}</span>
-    </button>
+    </Button>
   );
 }

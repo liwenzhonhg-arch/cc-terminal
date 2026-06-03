@@ -2,6 +2,9 @@ import { useEffect, useState, useCallback } from "react";
 import { useAgentStore } from "@/store/agents";
 import { useGitStore, type GitFileStatus } from "@/store/git";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/i18n";
 
 const STATUS_COLOR: Record<string, string> = {
@@ -196,13 +199,9 @@ export function GitPanelContent() {
               <span className="font-mono text-2xs text-muted">{status.branch}</span>
             )}
           </div>
-          <button
-            onClick={handleRefresh}
-            className="font-mono text-2xs text-muted hover:text-ink transition-colors"
-            title={t("git.refresh")}
-          >
+          <Button variant="ghost" size="sm" onClick={handleRefresh} title={t("git.refresh")}>
             ↻
-          </button>
+          </Button>
         </div>
         {status?.upstream && (
           <div className="font-mono text-2xs text-faint mt-0.5">
@@ -265,18 +264,12 @@ export function GitPanelContent() {
                 {t("git.files")} ({status.files.length})
               </span>
               <div className="flex gap-2">
-                <button
-                  onClick={() => handleStageAll(false)}
-                  className="font-mono text-2xs text-muted hover:text-ink transition-colors"
-                >
+                <Button variant="ghost" size="sm" onClick={() => handleStageAll(false)}>
                   {t("git.stageAll")}
-                </button>
-                <button
-                  onClick={() => handleStageAll(true)}
-                  className="font-mono text-2xs text-muted hover:text-ink transition-colors"
-                >
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => handleStageAll(true)}>
                   {t("git.unstageAll")}
-                </button>
+                </Button>
               </div>
             </div>
             <div className="flex flex-col gap-px max-h-[200px] overflow-y-auto">
@@ -348,50 +341,33 @@ export function GitPanelContent() {
                   <span className="font-mono text-2xs text-muted uppercase tracking-wider">
                     {t("git.commitMessage")}
                   </span>
-                  <button
-                    onClick={handleGenerate}
-                    className="font-mono text-2xs text-amber hover:text-amber/80 transition-colors"
-                  >
+                  <Button variant="ghost" size="sm" className="text-amber hover:text-amber/80" onClick={handleGenerate}>
                     ◎ {t("git.autoGenerate")}
-                  </button>
+                  </Button>
                 </div>
-                <textarea
+                <Textarea
                   value={commitMessage}
                   onChange={(e) => setCommitMessage(e.target.value)}
                   placeholder={t("git.commitPlaceholder")}
                   rows={3}
-                  className="w-full bg-surface-raised/80 border border-border/50 px-2 py-1.5 font-mono text-2xs text-ink resize-none focus:outline-none focus:border-amber/50 transition-colors"
+                  className="text-2xs min-h-0 resize-none"
                 />
                 <div className="flex flex-wrap gap-2 mt-2">
-                  <button
-                    onClick={handleCommit}
-                    disabled={!commitMessage.trim() || !status.hasStaged}
-                    className="font-mono text-2xs px-3 py-1 bg-amber text-white hover:bg-amber/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
+                  <Button size="sm" onClick={handleCommit} disabled={!commitMessage.trim() || !status.hasStaged}>
                     {t("git.commit")}
-                  </button>
-                  <button
-                    onClick={handleCommitAndPush}
-                    disabled={!commitMessage.trim() || !status.hasStaged}
-                    className="font-mono text-2xs px-3 py-1 border border-amber text-amber hover:bg-amber/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
+                  </Button>
+                  <Button variant="outline" size="sm" className="border-amber text-amber hover:bg-amber/10" onClick={handleCommitAndPush} disabled={!commitMessage.trim() || !status.hasStaged}>
                     {t("git.commitAndPush")}
-                  </button>
+                  </Button>
                   {status.ahead > 0 && (
-                    <button
-                      onClick={handlePush}
-                      className="font-mono text-2xs px-3 py-1 border border-border text-muted hover:text-ink transition-colors"
-                    >
+                    <Button variant="outline" size="sm" onClick={handlePush}>
                       {t("git.push")}
-                    </button>
+                    </Button>
                   )}
                   {ghAuthenticated && (
-                    <button
-                      onClick={() => setPrFormOpen(true)}
-                      className="font-mono text-2xs px-3 py-1 border border-border text-muted hover:text-ink transition-colors"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setPrFormOpen(true)}>
                       {t("git.createPr")}
-                    </button>
+                    </Button>
                   )}
                 </div>
               </>
@@ -400,39 +376,32 @@ export function GitPanelContent() {
                 <span className="font-mono text-2xs text-muted uppercase tracking-wider block mb-1.5">
                   {t("git.createPr")}
                 </span>
-                <input
+                <Input
                   value={prTitle}
                   onChange={(e) => setPrField("title", e.target.value)}
                   placeholder={t("git.prTitle")}
-                  className="w-full bg-surface-raised/80 border border-border/50 px-2 py-1 font-mono text-2xs text-ink focus:outline-none focus:border-amber/50 transition-colors mb-1.5"
+                  className="text-2xs mb-1.5"
                 />
-                <textarea
+                <Textarea
                   value={prBody}
                   onChange={(e) => setPrField("body", e.target.value)}
                   placeholder={t("git.prBody")}
                   rows={4}
-                  className="w-full bg-surface-raised/80 border border-border/50 px-2 py-1.5 font-mono text-2xs text-ink resize-none focus:outline-none focus:border-amber/50 transition-colors mb-1.5"
+                  className="text-2xs min-h-0 resize-none mb-1.5"
                 />
-                <input
+                <Input
                   value={prBase}
                   onChange={(e) => setPrField("base", e.target.value)}
                   placeholder={t("git.prBase")}
-                  className="w-full bg-surface-raised/80 border border-border/50 px-2 py-1 font-mono text-2xs text-ink focus:outline-none focus:border-amber/50 transition-colors mb-2"
+                  className="text-2xs mb-2"
                 />
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleCreatePr}
-                    disabled={!prTitle.trim()}
-                    className="font-mono text-2xs px-3 py-1 bg-amber text-white hover:bg-amber/80 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
+                  <Button size="sm" onClick={handleCreatePr} disabled={!prTitle.trim()}>
                     {t("git.prSubmit")}
-                  </button>
-                  <button
-                    onClick={() => setPrFormOpen(false)}
-                    className="font-mono text-2xs px-3 py-1 border border-border text-muted hover:text-ink transition-colors"
-                  >
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setPrFormOpen(false)}>
                     {t("git.prCancel")}
-                  </button>
+                  </Button>
                 </div>
               </>
             )}

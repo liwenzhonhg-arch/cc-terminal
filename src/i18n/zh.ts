@@ -309,6 +309,16 @@ export const zh = {
   "cmd.commitOpened": "Git 面板已打开。",
   "cmd.prOpened": "Git 面板已打开（PR 模式）。",
 
+  // CommandPalette
+  "cmdPalette.placeholder": "输入命令或搜索对话...",
+  "cmdPalette.noResults": "未找到匹配项",
+  "cmdPalette.threads": "切换对话",
+  "cmdPalette.actions": "操作",
+  "cmdPalette.commands": "命令",
+  "cmdPalette.newThread": "新建对话",
+  "cmdPalette.toggleTheme": "切换主题",
+  "cmd.noResults": "无匹配命令",
+
   // ThreadTabBar
   "threadTab.closeTab": "关闭标签",
 
